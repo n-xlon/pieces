@@ -21,8 +21,7 @@
 		</ul>
 	</div>
 </body>
-<script src="./zepto.min.js"></script>
-<script src="https://cdn.bootcss.com/touchjs/0.2.14/touch.min.js"></script>
+<script src="./static/zepto.min.js"></script>
 <script>
 	let ulist = []
 	let domW, domH, latticeNums
@@ -53,7 +52,7 @@
 			// } else {
 			let w = pieceW * (i - (+Math.ceil(i/latticeNums) * latticeNums - latticeNums) - 1)
 			let h = pieceH * (Math.ceil(i/latticeNums) - 1)
-			cDom.style.background = "url('./pic.jpg') -" + w + "px -" + h + "px"
+			cDom.style.background = "url('./images/pic.jpg') -" + w + "px -" + h + "px"
 			cDom.style.top = h + 'px'
 			cDom.style.left = w + 'px'
 			// }
