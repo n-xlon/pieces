@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="./index.css">
+</head>
+<body>
+	<div class="rewards">
+		<ul class="rewards_modal">
+			<li class="rewards_piece rw" id="rd1"></li>
+			<li class="rewards_piece rw" id="rd2"></li>
+			<li class="rewards_piece rw" id="rd3"></li>
+			<li class="rewards_piece rw" id="rd8"></li>
+			<li class="rewards_piece rewards_btn" id="rewards_touch_btn"></li>
+			<li class="rewards_piece rw" id="rd4"></li>
+			<li class="rewards_piece rw" id="rd7"></li>
+			<li class="rewards_piece rw" id="rd6"></li>
+			<li class="rewards_piece rw" id="rd5"></li>
+		</ul>
+	</div>
+</body>
+<script>
+	let time
+	let rw = 1
+	let loopTime = 200
+	window.onload = function () {
+		let rewards = document.getElementById('rewards_touch_btn')
+		let activeType = false
+		rewards.onclick = function () {
+			if (activeType) return
+			activeType = true
+			loopRewards()
+
+			setTimeout(function(){
+				clearInterval(time)
+				loopTime = 100
+				loopRewards()
+				slowLoop()
+			}, 2000)
+		}
+	}
+
+	function loopRewards (num) {
+		let afterRound = false
+		time = setInterval(function(){
+			if (num !== 'undefined' && rw === num) {
+				if (afterRound) {
+					clearInterval(time)
+				}
+				afterRound = true
+			}
+
+			let rd = document.getElementById('rd' + rw)
+			rd.style.border = "1px solid blue"
+			if (rw !== 1) {
+				let pre = document.getElementById('rd' + (rw - 1))
+				pre.style.border = "1px solid #fff"
+			} else {
+				let pre = document.getElementById('rd' + 8)
+				pre.style.border = "1px solid #fff"
+			}
+			rw++
+			if (rw > 8) {
+				rw = 1
+			}
+		}, loopTime)
+	}
+
+	function slowLoop () {
+		setTimeout(function(){
+			clearInterval(time)
+			loopTime = 200
+			let num = 8
+			loopRewards(num)
+		}, 2000)
+	}
+</script>
+</html>
