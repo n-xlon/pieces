@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>双旦活动</title>
+	<link rel="stylesheet" href="./static/index.css">
+</head>
+<body>
+	<div class="jigsaw">
+		<ul class="jigsaw_modal">
+			<!-- <li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li>
+			<li class="jigsaw_piece"></li> -->
+		</ul>
+	</div>
+</body>
+<script src="./static/zepto.min.js"></script>
+<script>
+	let ulist = []
+	let domW, domH, latticeNums
+	window.onload = function () {
+		latticeNums = 3
+		let dom = document.getElementsByClassName('jigsaw_modal')[0]
+		domW = dom.offsetWidth
+		domH = dom.offsetHeight
+		let pieceW = domW / latticeNums - 2
+		let pieceH = domH / latticeNums - 2
+		for (let i = 1; i <= Math.pow(latticeNums, 2); i++) {
+			let cDom = document.createElement('li')
+			cDom.className = 'jigsaw_piece'
+			cDom.style.width = pieceW + 'px'
+			cDom.style.height = pieceH + 'px'
+			cDom.setAttribute('data-label', i)
+			// if (Math.ceil(i/3) == 1) {
+			// 	let w = pieceW * (i - 1)
+			// 	cDom.style.background = "url('./pic.jpg') -" + w + "px 0"
+			// 	cDom.style.top = 0 + 'px'
+			// 	cDom.style.left = w + 'px'
+			// } else if (Math.ceil(i/3) == 2) {
+			// 	let w = pieceW * (i - 3 - 1)
+			// 	let h = pieceH
+			// 	cDom.style.background = "url('./pic.jpg') -" + w + "px -" + h + "px"
+			// 	cDom.style.top = h + 'px'
+			// 	cDom.style.left = w + 'px'
+			// } else {
+			let w = pieceW * (i - (+Math.ceil(i/latticeNums) * latticeNums - latticeNums) - 1)
+			let h = pieceH * (Math.ceil(i/latticeNums) - 1)
+			cDom.style.background = "url('./images/pic.jpg') -" + w + "px -" + h + "px"
+			cDom.style.top = h + 'px'
+			cDom.style.left = w + 'px'
+			// }
+			ulist.push(cDom.outerHTML)
+		}
+		dom.innerHTML = ulist.join('')
+//		console.log(ulist)
+		setTimeout(function(){
+			randomPieces()
+			listenPieces()
+		}, 2000)
+	}
+
+	function randomPieces () {
+		let temp = '', top, left
+		let len = ulist.length - 1
+		// console.log(dm)
+		for (let i = len - 1; i >= 0; i--) {
+			let dm = document.getElementsByClassName('jigsaw_piece')
+			let rmd = parseInt(Math.random() * len)
+//			console.log(dm[rmd].style.top)
+			top = dm[rmd].style.top
+			left = dm[rmd].style.left
+			label = dm[rmd].getAttribute('data-label')
+			dm[rmd].style.top = dm[i].style.top
+			dm[rmd].style.left = dm[i].style.left
+			dm[rmd].setAttribute('data-label', dm[i].getAttribute('data-label'))
+			dm[i].style.top = top
+			dm[i].style.left = left
+			dm[i].setAttribute('data-label', label)
+			// temp = ulist[rmd]
+			// ulist[rmd] = ulist[len]
+			// ulist[len] = temp
+		}
+
+		// console.log(ulist)
+		// let data = ulist.join('')
+		// console.log(data)
+		// dom.innerHTML = data
+	}
+
+	let curT = 0
+	let curL = 0
+	let ctop = 0
+	let cleft = 0
+	let changeY, changeX, cliX, cliY
+	let el = ''
+	let pieces = document.getElementsByClassName('jigsaw_modal')[0]
+	function listenPieces (e) {
+		pieces.addEventListener('mousedown', mousedownPieces)
+		$('.jigsaw_modal').on('touchstart', mousedownPieces)
+//		pieces.onmouseout = function () {
+//			outPieces()
+//		}
+	}
+
+	function movePieces (e) {
+		cliX = e.clientX || e.touches[0].clientX
+		cliY = e.clientY || e.touches[0].clientY
+		e.stopPropagation()
+		// console.log(cliX, cliY, 11)
+		changeY = ctop - (curT - cliY)
+		changeX = cleft - (curL - cliX)
+		el.style.top = ctop - (curT - cliY) + 'px'
+		el.style.left = cleft - (curL - cliX) + 'px'
+		el.style.opacity = .5
+		el.style.zIndex = 10
+		$(document).on('touchend', upPieces)
+		document.addEventListener('mouseup', upPieces)
+		document.addEventListener('onblur', upPieces)
+	}
+
+	function mousedownPieces (e) {
+		el = e.target
+		if (el.className !== 'jigsaw_piece') return
+		curT = e.clientY || e.touches[0].clientY
+		curL = e.clientX || e.touches[0].clientX
+		ctop = +el.style.top.replace(/px/, '')
+		cleft = +el.style.left.replace(/px/, '')
+		document.addEventListener('mousemove', movePieces)
+		pieces.addEventListener('mouseup', upPieces)
+		$(document).on('touchmove', movePieces)
+		$('.jigsaw_modal').on('touchend', mousedownPieces)
+	}
+
+	function upPieces () {
+		document.removeEventListener('mousemove', movePieces)
+		document.removeEventListener('mouseup', upPieces)
+		$(document).off('touchmove', movePieces)
+		$(document).off('touchend', upPieces)
+		// pieces.removeEventListener('mousedown', mousedownPieces)
+		pieces.removeEventListener('mouseup', upPieces)
+
+
+		let domAll = document.getElementsByClassName('jigsaw_piece')
+		let parent = domAll[0].parentNode
+		let top = 0
+		let left = 0
+		parentNode(parent)
+		function parentNode (parent) {
+			top += parent.offsetTop
+			left += parent.offsetLeft
+			if (parent.parentNode && typeof parent.parentNode.offsetTop !== 'undefined') {
+				parentNode(parent.parentNode)
+			}
+		}
+
+		if (el) {
+			el.style.opacity = 1
+			el.style.zIndex = ''
+		}
+		if (+cliY >= domH + top || +cliX >= domW + left || +cliX <= left || +cliY <= top) {
+			el.style.top = ctop + 'px'
+			el.style.left = cleft + 'px'
+			return
+		}
+		getAllPiecesPosition(domAll, top, left)
+	}
+
+	function getAllPiecesPosition (domAll, top, left) {
+		let type = false
+		// while (parent) {
+		// 	top += parent.offsetTop
+		// 	left += parent.offsetLeft
+		// 	if (parent.parentNode) {
+		// 		parent = parent.parentNode
+		// 	}
+		// }
+		
+
+		if (domAll && domAll.length > 0) {
+			for(let j = 0; j < domAll.length; j++) {
+				let t = +domAll[j].style.top.replace(/px/, '')
+				let l = +domAll[j].style.left.replace(/px/, '')
+				let label = domAll[j].dataset.label
+				console.log(t, l, cliX, cliY, top, left)
+				if (+cliY >= t + top && +cliY <= t + (domH / latticeNums - (latticeNums - 1)) + top && +cliX >= l + left && +cliX <= l + (domW / latticeNums - (latticeNums - 1)) + left && label !== el.dataset.label) {
+					type = true
+					domAll[j].style.top = ctop + 'px'
+					domAll[j].style.left = cleft + 'px'
+					domAll[j].dataset.label = el.dataset.label
+					el.style.top = t + 'px'
+					el.style.left = l + 'px'
+					el.setAttribute('data-label', label)
+					// console.log(t, l, ctop, cleft, domAll[j].dataset.label, el.dataset.label)
+				}
+			}
+			if (!type) {
+				el.style.top = ctop + 'px'
+				el.style.left = cleft + 'px'
+			}
+			checkPieces()	
+		}
+	}
+
+	function checkPieces () {
+		let checkList = document.getElementsByClassName('jigsaw_piece')
+		let arr = []
+		let str = ''
+		if (checkList && checkList.length > 0) {
+			for(let j = 1; j <= checkList.length; j++) {
+				arr.push(checkList[j-1].dataset.label)
+				str += j
+			}
+			console.log(str)
+			setTimeout(function () {
+				if (arr.join('') == str) {
+					pieces.removeEventListener('mousedown', mousedownPieces)
+                  
+		   $('.jigsaw_modal').off('touchstart', mousedownPieces)
+//		pieces.onmouseout = function () {
+					alert('拼图完成')
+				}
+			}, 1000)
+		}
+	}
+	
+//	function outPieces () {
+//		upPieces()
+//	}
+</script>
+</html>
