@@ -37,6 +37,9 @@ html, body {
 	box-sizing: border-box;
 	transform: scale(0.98);
 }
+.is-up {
+	pointer-events: none	
+}
 
 .rewards {
 	width: 260px;

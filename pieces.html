@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<title>双旦活动</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,minimum-scale=1,user-scalable=0"/>	
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="HandheldFriendly" content="true">
+	<meta http-equiv="cache-control" content="no-cache">	
+        <title>双旦活动</title>
 	<link rel="stylesheet" href="./static/index.css">
 </head>
 <body>
@@ -64,6 +67,10 @@
 			randomPieces()
 			listenPieces()
 		}, 2000)
+                document.addEventListener('gesturestart', function(event) {
+                      event.preventDefault();
+                      // alert(1111)
+                })
 	}
 
 	function randomPieces () {
@@ -103,16 +110,43 @@
 	let pieces = document.getElementsByClassName('jigsaw_modal')[0]
 	function listenPieces (e) {
 		pieces.addEventListener('mousedown', mousedownPieces)
-		$('.jigsaw_modal').on('touchstart', mousedownPieces)
+		pieces.addEventListener('touchstart', mousedownPieces)
 //		pieces.onmouseout = function () {
 //			outPieces()
 //		}
 	}
 
+	function mousedownPieces (e) {
+		e.preventDefault()
+                if (e.touches && e.touches.length > 1) {
+               		return
+                }
+                el = e.target
+		if (el.className !== 'jigsaw_piece') return
+		let scrollT = document.body.scrollTop
+		curT = e.clientY || e.touches[0].clientY
+		curL = e.clientX || e.touches[0].clientX
+		if (scrollT) {
+			//alert(document.body.scrollTop)
+			curT += scrollT
+		}
+		ctop = +el.style.top.replace(/px/, '')
+		cleft = +el.style.left.replace(/px/, '')
+		document.addEventListener('mousemove', movePieces)
+		pieces.addEventListener('mouseup', upPieces)
+		document.addEventListener('touchmove', movePieces)
+		pieces.addEventListener('touchend', upPieces)
+	}
+
 	function movePieces (e) {
 		cliX = e.clientX || e.touches[0].clientX
 		cliY = e.clientY || e.touches[0].clientY
+		let scrollT = document.body.scrollTop
+		if (scrollT) {
+			cliY += scrollT
+		}
 		e.stopPropagation()
+                e.preventDefault()
 		// console.log(cliX, cliY, 11)
 		changeY = ctop - (curT - cliY)
 		changeX = cleft - (curL - cliX)
@@ -120,29 +154,20 @@
 		el.style.left = cleft - (curL - cliX) + 'px'
 		el.style.opacity = .5
 		el.style.zIndex = 10
-		$(document).on('touchend', upPieces)
+		document.addEventListener('touchend', upPieces)
 		document.addEventListener('mouseup', upPieces)
 		document.addEventListener('onblur', upPieces)
-	}
 
-	function mousedownPieces (e) {
-		el = e.target
-		if (el.className !== 'jigsaw_piece') return
-		curT = e.clientY || e.touches[0].clientY
-		curL = e.clientX || e.touches[0].clientX
-		ctop = +el.style.top.replace(/px/, '')
-		cleft = +el.style.left.replace(/px/, '')
-		document.addEventListener('mousemove', movePieces)
-		pieces.addEventListener('mouseup', upPieces)
-		$(document).on('touchmove', movePieces)
-		$('.jigsaw_modal').on('touchend', mousedownPieces)
 	}
 
 	function upPieces () {
 		document.removeEventListener('mousemove', movePieces)
 		document.removeEventListener('mouseup', upPieces)
-		$(document).off('touchmove', movePieces)
-		$(document).off('touchend', upPieces)
+		document.removeEventListener('touchmove', movePieces)
+		pieces.removeEventListener('touchend', upPieces)
+		document.removeEventListener('touchend', upPieces)
+		document.removeEventListener('touchmove', movePieces)
+		
 		// pieces.removeEventListener('mousedown', mousedownPieces)
 		pieces.removeEventListener('mouseup', upPieces)
 
@@ -217,16 +242,18 @@
 				arr.push(checkList[j-1].dataset.label)
 				str += j
 			}
-			console.log(str)
-			setTimeout(function () {
-				if (arr.join('') == str) {
-					pieces.removeEventListener('mousedown', mousedownPieces)
-                  
-		   $('.jigsaw_modal').off('touchstart', mousedownPieces)
-//		pieces.onmouseout = function () {
+			console.log(str)	
+			if (arr.join('') == str) {
+				pieces.removeEventListener('mousedown', mousedownPieces)
+                                pieces.removeEventListener('touchstart', mousedownPieces)
+		   		$('.jigsaw_modal').off('touchstart', mousedownPieces).addClass('is-up')
+				setTimeout(function () {
+			
 					alert('拼图完成')
-				}
-			}, 1000)
+				
+				}, 1000)
+			}
+			
 		}
 	}
 	
